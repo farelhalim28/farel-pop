@@ -727,64 +727,33 @@
                         <div class="row mb-4">
                             <div class="col-lg-4 col-sm-6">
                                 <div class="components-section">
-                                    <form action="{{ route('pelanggan.store') }}" method="POST">
+                                    <form action="{{ route('user.store') }}" method="POST">
                                         @csrf
                                         <div class="row">
                                             <div class="col-md-6 col-lg-4 mb-3">
-                                                <label for="first_name" class="form-label">First name</label>
-                                                <input type="text" class="form-control" id="first_name"
-                                                    name="first_name" value="{{ old('first_name') }}"
-                                                    placeholder="Enter first name" required>
+                                                <label for="name" class="form-label">nama lengkap</label>
+                                                <input type="text" class="form-control" id="name"
+                                                    name="name" value="{{ old('name') }}"
+                                                    placeholder="Enter Nama Lengkap" required>
                                             </div>
 
                                             <div class="col-md-6 col-lg-4 mb-3">
-                                                <label for="last_name" class="form-label">Last name</label>
-                                                <input type="text" class="form-control" id="last_name"
-                                                    name="last_name" value="{{ old('last_name') }}"
-                                                    placeholder="Enter last name" required>
-                                            </div>
-
-                                            <div class="col-md-6 col-lg-4 mb-3">
-                                                <label for="birthday" class="form-label">Birthday</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">
-                                                        <svg class="icon icon-xs text-gray-600" fill="currentColor"
-                                                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd"
-                                                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                                clip-rule="evenodd"></path>
-                                                        </svg>
-                                                    </span>
-                                                    <input type="date" class="form-control" id="birthday"
-                                                        name="birthday" value="{{ old('birthday') }}" required>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 col-lg-4 mb-3">
-                                                <label for="gender" class="form-label">Gender</label>
-                                                <select class="form-select" id="gender" name="gender" required>
-                                                    <option value="">-- Pilih --</option>
-                                                    <option value="Male"
-                                                        {{ old('gender') == 'Male' ? 'selected' : '' }}>Laki-laki
-                                                    </option>
-                                                    <option value="Female"
-                                                        {{ old('gender') == 'Female' ? 'selected' : '' }}>Perempuan
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-6 col-lg-4 mb-3">
-                                                <label for="email" class="form-label">Email</label>
-                                                <input type="email" class="form-control" id="email"
+                                                <label for="email" class="form-label">email</label>
+                                                <input type="text" class="form-control" id="email"
                                                     name="email" value="{{ old('email') }}"
-                                                    placeholder="Enter email" required>
+                                                    placeholder="Masukkan email" required>
                                             </div>
-
                                             <div class="col-md-6 col-lg-4 mb-3">
-                                                <label for="phone" class="form-label">Phone</label>
-                                                <input type="text" class="form-control" id="phone"
-                                                    name="phone" value="{{ old('phone') }}"
-                                                    placeholder="Enter phone number" required>
+                                                <label for="password" class="form-label">password</label>
+                                                <input type="text" class="form-control" id="email"
+                                                    name="password" value="{{ old('password') }}"
+                                                    placeholder="Masukkan Password" required>
+                                            </div>
+                                            <div class="col-md-6 col-lg-4 mb-3">
+                                                <label for="password_confirmation" class="form-label">password confirmation</label>
+                                                <input type="text" class="form-control" id="password_confirmation"
+                                                    name="password_confirmation" value="{{ old('password_confirmation') }}"
+                                                    placeholder="Masukkan Konfirmasi Password" required>
                                             </div>
                                         </div>
 
