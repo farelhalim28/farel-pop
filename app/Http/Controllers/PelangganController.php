@@ -10,9 +10,20 @@ class PelangganController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data['dataPelanggan'] = Pelanggan::all();
+        // Kolom yang bisa di-filter
+        $filterableColumns = ['gender'];
+
+        // Kolom yang bisa di-search
+        $searchableColumns = ['first_name', 'last_name', 'email'];
+
+        // Query dengan filter, search, dan pagination
+        $data['dataPelanggan'] = Pelanggan::filter($request, $filterableColumns)
+                                          ->search($request, $searchableColumns)
+                                          ->paginate(10)
+                                          ->withQueryString();
+
         return view('admin.pelanggan.index', $data);
     }
 
@@ -33,14 +44,13 @@ class PelangganController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'birthday' => 'required|date',
-            'gender' => 'required|in:Male,Female',
-            'email' => 'required|email|unique:pelanggans,email',
+            'gender' => 'required|in:Male,Female,Other',
+            'email' => 'required|email|unique:pelanggan,email',
             'phone' => 'required|string|max:20',
         ]);
 
         Pelanggan::create($validated);
 
-        // Redirect ke index (daftar pelanggan) setelah berhasil tambah
         return redirect()->route('pelanggan.index')->with('success', 'Data pelanggan berhasil ditambahkan!');
     }
 
@@ -71,8 +81,8 @@ class PelangganController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'birthday' => 'required|date',
-            'gender' => 'required|in:Male,Female',
-            'email' => 'required|email|unique:pelanggans,email,' . $id,
+            'gender' => 'required|in:Male,Female,Other',
+            'email' => 'required|email|unique:pelanggan,email,' . $id . ',pelanggan_id',
             'phone' => 'required|string|max:20',
         ]);
 
