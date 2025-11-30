@@ -13,19 +13,28 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // Kolom yang bisa di-filter
-        $filterableColumns = []; // Tambahkan jika ada filter, contoh: ['status', 'role']
-
         // Kolom yang bisa di-search
         $searchableColumns = ['name', 'email'];
 
-        // Query dengan filter, search, dan pagination
-        $data['dataUser'] = User::filter($request, $filterableColumns)
-                                ->search($request, $searchableColumns)
-                                ->paginate(10)
-                                ->withQueryString();
+        // Query dengan filter custom, search, dan pagination
+        $query = User::query();
 
-        return view('admin.user.index', $data);
+        // Filter berdasarkan status verifikasi email
+        if ($request->filled('email_verified')) {
+            if ($request->email_verified == 'verified') {
+                $query->whereNotNull('email_verified_at');
+            } elseif ($request->email_verified == 'unverified') {
+                $query->whereNull('email_verified_at');
+            }
+        }
+
+        // Search
+        $users = $query->search($request, $searchableColumns)
+                       ->latest()
+                       ->paginate(10)
+                       ->withQueryString();
+
+        return view('admin.user.index', compact('users'));
     }
 
     /**
@@ -61,8 +70,8 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $data['user'] = User::findOrFail($id);
-        return view('admin.user.show', $data);
+        $user = User::findOrFail($id);
+        return view('admin.user.show', compact('user'));
     }
 
     /**
@@ -70,8 +79,8 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $data['user'] = User::findOrFail($id);
-        return view('admin.user.edit', $data);
+        $user = User::findOrFail($id);
+        return view('admin.user.edit', compact('user'));
     }
 
     /**
@@ -83,14 +92,28 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:6|confirmed',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = User::findOrFail($id);
         $user->name = $validated['name'];
         $user->email = $validated['email'];
 
+        // Update password jika diisi
         if ($request->filled('password')) {
             $user->password = Hash::make($validated['password']);
+        }
+
+        // Upload foto profil jika ada
+        if ($request->hasFile('profile_picture')) {
+            // Hapus foto lama jika ada
+            if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
+                \Storage::disk('public')->delete($user->profile_picture);
+            }
+
+            // Simpan foto baru
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $user->profile_picture = $path;
         }
 
         $user->save();

@@ -3,103 +3,121 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
+use App\Models\MultipleUpload;
 use Illuminate\Http\Request;
 
 class PelangganController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        // Kolom yang bisa di-filter
-        $filterableColumns = ['gender'];
+        $query = Pelanggan::query();
 
-        // Kolom yang bisa di-search
-        $searchableColumns = ['first_name', 'last_name', 'email'];
+        if ($request->gender) {
+            $query->where('gender', $request->gender);
+        }
 
-        // Query dengan filter, search, dan pagination
-        $data['dataPelanggan'] = Pelanggan::filter($request, $filterableColumns)
-                                          ->search($request, $searchableColumns)
-                                          ->paginate(10)
-                                          ->withQueryString();
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('first_name', 'like', '%'.$request->search.'%')
+                  ->orWhere('last_name', 'like', '%'.$request->search.'%')
+                  ->orWhere('email', 'like', '%'.$request->search.'%');
+            });
+        }
 
-        return view('admin.pelanggan.index', $data);
+        $dataPelanggan = $query->paginate(10);
+
+        return view('admin.pelanggan.index', compact('dataPelanggan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         return view('admin.pelanggan.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'birthday' => 'required|date',
-            'gender' => 'required|in:Male,Female,Other',
-            'email' => 'required|email|unique:pelanggan,email',
-            'phone' => 'required|string|max:20',
+        $request->validate([
+            'first_name' => 'required',
+            'last_name'  => 'required',
+            'birthday'   => 'required',
+            'gender'     => 'required',
+            'email'      => 'required|email|unique:pelanggan,email',
+            'phone'      => 'required'
         ]);
 
-        Pelanggan::create($validated);
+        Pelanggan::create($request->all());
 
-        return redirect()->route('pelanggan.index')->with('success', 'Data pelanggan berhasil ditambahkan!');
+        return redirect()->route('pelanggan.index')
+            ->with('success', 'Data berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+
+    public function show($id)
+{
+    $dataPelanggan = Pelanggan::findOrFail($id);
+
+    $files = MultipleUpload::where('ref_table', 'pelanggan')
+        ->where('ref_id', $dataPelanggan->pelanggan_id)
+        ->get();
+
+    return view('admin.pelanggan.show', compact('dataPelanggan', 'files'));
+}
+
+
+
+    public function edit($id)
     {
-        $data['pelanggan'] = Pelanggan::findOrFail($id);
-        return view('admin.pelanggan.show', $data);
+        $dataPelanggan = Pelanggan::findOrFail($id);
+        return view('admin.pelanggan.edit', compact('dataPelanggan'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $data['pelanggan'] = Pelanggan::findOrFail($id);
-        return view('admin.pelanggan.edit', $data);
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'birthday' => 'required|date',
-            'gender' => 'required|in:Male,Female,Other',
-            'email' => 'required|email|unique:pelanggan,email,' . $id . ',pelanggan_id',
-            'phone' => 'required|string|max:20',
+        $request->validate([
+            'first_name' => 'required',
+            'last_name'  => 'required',
+            'birthday'   => 'required',
+            'gender'     => 'required',
+            'email'      => 'required|email|unique:pelanggan,email,' . $id . ',pelanggan_id',
+            'phone'      => 'required',
+            'files.*'    => 'nullable|mimes:jpg,jpeg,png,gif,webp,mp4,mov,avi,mkv,webm,pdf,doc,docx,zip|max:204800'
         ]);
 
-        $pelanggan = Pelanggan::findOrFail($id);
-        $pelanggan->update($validated);
+        $dataPelanggan = Pelanggan::findOrFail($id);
+        $dataPelanggan->update($request->only(['first_name','last_name','birthday','gender','email','phone']));
 
-        return redirect()->route('pelanggan.index')->with('success', 'Data pelanggan berhasil diupdate!');
+
+        // === MULTIPLE FILE UPLOAD ===
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+
+                $path = $file->store('uploads/pelanggan', 'public');
+
+                MultipleUpload::create([
+                    'ref_table'      => 'pelanggan',
+                    'ref_id'         => $dataPelanggan->pelanggan_id,
+                    'file_path'      => $path,
+                    'filename'       => $file->hashName(),  // 👈 FIX ERROR
+                    'original_name'  => $file->getClientOriginalName(),
+                ]);
+            }
+        }
+
+        return redirect()->route('pelanggan.index')
+            ->with('success', 'Data berhasil diperbarui & file ditambahkan');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+
+    public function destroy($id)
     {
-        $pelanggan = Pelanggan::findOrFail($id);
-        $pelanggan->delete();
+        $dataPelanggan = Pelanggan::findOrFail($id);
+        $dataPelanggan->delete();
 
-        return redirect()->route('pelanggan.index')->with('success', 'Data pelanggan berhasil dihapus!');
+        return redirect()->route('pelanggan.index')
+            ->with('success', 'Data berhasil dihapus');
     }
+
 }

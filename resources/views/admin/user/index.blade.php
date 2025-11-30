@@ -21,75 +21,131 @@
                     @endif
 
                     <!-- FORM FILTER & SEARCH -->
-                    <div class="table-responsive">
-                        <form method="GET" action="{{ route('user.index') }}" class="mb-3">
-                            <div class="row">
+                    <div class="mb-3">
+                        <form method="GET" action="{{ route('user.index') }}">
+                            <div class="row g-2">
+                                <!-- FILTER EMAIL VERIFIED -->
+                                <div class="col-md-2">
+                                    <select name="email_verified" class="form-select" onchange="this.form.submit()">
+                                        <option value="">Semua Status</option>
+                                        <option value="verified" {{ request('email_verified') == 'verified' ? 'selected' : '' }}>Email Terverifikasi</option>
+                                        <option value="unverified" {{ request('email_verified') == 'unverified' ? 'selected' : '' }}>Belum Verifikasi</option>
+                                    </select>
+                                </div>
+
                                 <!-- SEARCH -->
                                 <div class="col-md-4">
                                     <div class="input-group">
                                         <input type="text" name="search" class="form-control"
                                                value="{{ request('search') }}"
                                                placeholder="Cari nama atau email...">
-                                        <button type="submit" class="btn btn-outline-secondary">
+                                        <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-search"></i>
                                         </button>
-                                        @if(request('search'))
-                                            <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}"
-                                               class="btn btn-outline-danger">
-                                                Clear
-                                            </a>
-                                        @endif
                                     </div>
+                                </div>
+
+                                <!-- BUTTON RESET -->
+                                <div class="col-md-2">
+                                    @if(request('search') || request('email_verified'))
+                                        <a href="{{ route('user.index') }}" class="btn btn-outline-danger w-100">
+                                            <i class="fas fa-times-circle"></i> Reset
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </form>
+                    </div>
 
-                        <!-- TABLE -->
+                    <!-- TABLE -->
+                    <div class="table-responsive">
                         <table class="table table-bordered table-striped table-hover" id="table-user">
                             <thead class="table-dark">
                                 <tr>
                                     <th width="5%">No</th>
                                     <th>Nama</th>
                                     <th>Email</th>
+                                    <th>Status Verifikasi</th>
                                     <th>Tanggal Dibuat</th>
                                     <th width="15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($dataUser as $key => $item)
+                                @forelse($users as $key => $item)
                                     <tr>
-                                        <td>{{ ($dataUser->currentPage() - 1) * $dataUser->perPage() + $key + 1 }}</td>
-                                        <td>{{ $item->name }}</td>
+                                        <td>{{ ($users->currentPage() - 1) * $users->perPage() + $key + 1 }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2">
+                                                    @if($item->profile_picture)
+                                                        <img src="{{ Storage::url($item->profile_picture) }}"
+                                                             alt="{{ $item->name }}"
+                                                             class="rounded-circle"
+                                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                                    @else
+                                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($item->name) }}&size=40&background=random"
+                                                             alt="{{ $item->name }}"
+                                                             class="rounded-circle">
+                                                    @endif
+                                                </div>
+                                                <span>{{ $item->name }}</span>
+                                            </div>
+                                        </td>
                                         <td>{{ $item->email }}</td>
+                                        <td>
+                                            @if($item->email_verified_at)
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle"></i> Terverifikasi
+                                                </span>
+                                            @else
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock"></i> Belum Verifikasi
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td>{{ $item->created_at->format('d M Y') }}</td>
                                         <td>
+                                            <a href="{{ route('user.show', $item->id) }}"
+                                               class="btn btn-sm btn-info"
+                                               title="Detail">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
                                             <a href="{{ route('user.edit', $item->id) }}"
-                                               class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i>
+                                               class="btn btn-sm btn-warning"
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
                                             </a>
                                             <form action="{{ route('user.destroy', $item->id) }}"
                                                   method="POST" class="d-inline"
-                                                  onsubmit="return confirm('Yakin ingin menghapus?')">
+                                                  onsubmit="return confirm('Yakin ingin menghapus user ini?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center">Data tidak ditemukan</td>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            @if(request('search'))
+                                                <i class="fas fa-search"></i>
+                                                Data tidak ditemukan dengan kata kunci "{{ request('search') }}"
+                                            @else
+                                                <i class="fas fa-inbox"></i>
+                                                Belum ada data user
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
 
-                        <!-- PAGINATION -->
-                        <div class="mt-3">
-                            {{ $dataUser->links('pagination::bootstrap-5') }}
-                        </div>
+                    <!-- PAGINATION -->
+                    <div class="mt-3">
+                        {{ $users->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>
