@@ -1,114 +1,119 @@
 @extends('layouts.admin.app')
 
-@section('title', 'Detail Pelanggan')
+@section('title', 'Detail User')
 
 @section('content')
 <div class="container-fluid">
-
-    <div class="d-flex justify-content-between mb-3">
-        <h4>Detail Pelanggan</h4>
-        <a href="{{ route('pelanggan.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Kembali
-        </a>
-    </div>
-
-    <div class="card shadow border-0">
-        <div class="card-body">
-            <div class="row mb-4">
-
-                {{-- Foto Auto Avatar --}}
-                <div class="col-md-3 text-center">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($dataPelanggan->first_name) }}&size=200&background=random"
-                        class="rounded-circle img-thumbnail mb-3"
-                        style="width: 180px; height:180px; object-fit:cover;">
-                </div>
-
-                {{-- Data --}}
-                <div class="col-md-9">
-                    <table class="table table-striped">
-                        <tr>
-                            <th>Nama Lengkap</th>
-                            <td>{{ $dataPelanggan->first_name }} {{ $dataPelanggan->last_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Lahir</th>
-                            <td>{{ $dataPelanggan->birthday }}</td>
-                        </tr>
-                        <tr>
-                            <th>Gender</th>
-                            <td>{{ $dataPelanggan->gender }}</td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td>{{ $dataPelanggan->email }}</td>
-                        </tr>
-                        <tr>
-                            <th>Phone</th>
-                            <td>{{ $dataPelanggan->phone }}</td>
-                        </tr>
-                        <tr>
-                            <th>Dibuat</th>
-                            <td>{{ $dataPelanggan->created_at->format('d M Y H:i') }}</td>
-                        </tr>
-                    </table>
-
-                    <a href="{{ route('pelanggan.edit', $dataPelanggan->pelanggan_id) }}" class="btn btn-warning mt-3">
-                        <i class="fas fa-edit"></i> Edit Pelanggan
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Detail User</h4>
+                    <a href="{{ route('user.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
-            </div>
 
-            <hr>
-
-            <h5 class="mt-4">File Pendukung</h5>
-
-            @if($files->count() > 0)
-                <div class="row mt-3">
-
-                    @foreach($files as $file)
-                        @php
-                            $ext = strtolower(pathinfo($file->original_name, PATHINFO_EXTENSION));
-                            $isImage = in_array($ext, ['jpg','jpeg','png','gif','webp']);
-                            $isVideo = in_array($ext, ['mp4','mov','avi','mkv','webm']);
-                        @endphp
-
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Foto Avatar -->
                         <div class="col-md-3 text-center mb-4">
-
-                            {{-- IMAGE PREVIEW --}}
-                            @if($isImage)
-                                <img src="{{ asset('storage/' . $file->file_path) }}"
-                                     class="img-fluid rounded mb-2"
-                                     style="height:160px; object-fit:cover;">
-
-                            {{-- VIDEO PREVIEW --}}
-                            @elseif($isVideo)
-                                <video controls class="w-100 border rounded" style="height:160px; object-fit:cover;">
-                                    <source src="{{ asset('storage/' . $file->file_path) }}" type="video/mp4">
-                                </video>
-
-                            {{-- OTHER FILE --}}
+                            @if($user->profile_picture)
+                                <img src="{{ Storage::url($user->profile_picture) }}"
+                                     alt="{{ $user->name }}"
+                                     class="rounded-circle img-thumbnail mb-3"
+                                     style="width: 200px; height: 200px; object-fit: cover;">
                             @else
-                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
-                                   class="btn btn-outline-info w-100">
-                                    📄 {{ $file->original_name }}
-                                </a>
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=200&background=random"
+                                     alt="{{ $user->name }}"
+                                     class="rounded-circle img-thumbnail mb-3"
+                                     style="width: 200px; height: 200px;">
                             @endif
 
-                            {{-- DELETE BUTTON --}}
-                            <form action="{{ route('multipleupload.destroy', $file->id) }}"
-                                  method="POST"
-                                  class="mt-2">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-danger btn-sm w-100">Hapus</button>
-                            </form>
+                            <!-- Status Verifikasi -->
+                            <div class="mt-3">
+                                @if($user->email_verified_at)
+                                    <span class="badge bg-success p-2">
+                                        <i class="fas fa-check-circle"></i> Email Terverifikasi
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning p-2">
+                                        <i class="fas fa-clock"></i> Belum Verifikasi
+                                    </span>
+                                @endif
+                            </div>
                         </div>
-                    @endforeach
-                </div>
 
-            @else
-                <p class="text-muted">Tidak ada file diupload.</p>
-            @endif
+                        <!-- Informasi Detail -->
+                        <div class="col-md-9">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th width="30%" class="bg-light">
+                                            <i class="fas fa-user"></i> Nama Lengkap
+                                        </th>
+                                        <td>{{ $user->name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">
+                                            <i class="fas fa-envelope"></i> Email
+                                        </th>
+                                        <td>{{ $user->email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">
+                                            <i class="fas fa-calendar-check"></i> Email Verified At
+                                        </th>
+                                        <td>
+                                            @if($user->email_verified_at)
+                                                {{ $user->email_verified_at->format('d M Y H:i') }}
+                                            @else
+                                                <span class="text-muted">Belum diverifikasi</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">
+                                            <i class="fas fa-calendar-plus"></i> Tanggal Dibuat
+                                        </th>
+                                        <td>{{ $user->created_at->format('d M Y H:i') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">
+                                            <i class="fas fa-calendar-alt"></i> Terakhir Diupdate
+                                        </th>
+                                        <td>{{ $user->updated_at->format('d M Y H:i') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">
+                                            <i class="fas fa-clock"></i> Lama Bergabung
+                                        </th>
+                                        <td>{{ $user->created_at->diffForHumans() }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 mt-4">
+                                <a href="{{ route('user.edit', $user->id) }}"
+                                   class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> Edit User
+                                </a>
+                                <form action="{{ route('user.destroy', $user->id) }}"
+                                      method="POST"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Yakin ingin menghapus user ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Hapus User
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
