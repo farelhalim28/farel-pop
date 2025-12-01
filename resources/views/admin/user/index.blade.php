@@ -24,6 +24,16 @@
                     <div class="mb-3">
                         <form method="GET" action="{{ route('user.index') }}">
                             <div class="row g-2">
+                                <!-- FILTER ROLE -->
+                                <div class="col-md-2">
+                                    <select name="role" class="form-select" onchange="this.form.submit()">
+                                        <option value="">Semua Role</option>
+                                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                                        <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+                                    </select>
+                                </div>
+
                                 <!-- FILTER EMAIL VERIFIED -->
                                 <div class="col-md-2">
                                     <select name="email_verified" class="form-select" onchange="this.form.submit()">
@@ -47,7 +57,7 @@
 
                                 <!-- BUTTON RESET -->
                                 <div class="col-md-2">
-                                    @if(request('search') || request('email_verified'))
+                                    @if(request('search') || request('email_verified') || request('role'))
                                         <a href="{{ route('user.index') }}" class="btn btn-outline-danger w-100">
                                             <i class="fas fa-times-circle"></i> Reset
                                         </a>
@@ -65,6 +75,7 @@
                                     <th width="5%">No</th>
                                     <th>Nama</th>
                                     <th>Email</th>
+                                    <th>Role</th>
                                     <th>Status Verifikasi</th>
                                     <th>Tanggal Dibuat</th>
                                     <th width="15%">Aksi</th>
@@ -92,6 +103,21 @@
                                             </div>
                                         </td>
                                         <td>{{ $item->email }}</td>
+                                        <td>
+                                            @if($item->role == 'admin')
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-user-shield"></i> Admin
+                                                </span>
+                                            @elseif($item->role == 'manager')
+                                                <span class="badge bg-primary">
+                                                    <i class="fas fa-user-tie"></i> Manager
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-user"></i> User
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td>
                                             @if($item->email_verified_at)
                                                 <span class="badge bg-success">
@@ -128,7 +154,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="7" class="text-center text-muted py-4">
                                             @if(request('search'))
                                                 <i class="fas fa-search"></i>
                                                 Data tidak ditemukan dengan kata kunci "{{ request('search') }}"

@@ -86,9 +86,38 @@
                             </div>
                         </div>
 
+                        {{-- TAMBAHAN: FIELD ROLE --}}
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                                <select name="role"
+                                        id="role"
+                                        class="form-select @error('role') is-invalid @enderror"
+                                        required>
+                                    <option value="">-- Pilih Role --</option>
+                                    <option value="SuperAdmin" {{ old('role') == 'SuoerAdmin' ? 'selected' : '' }}>
+                                        <i class="fas fa-user-shield"></i> Super Admin
+                                    </option>
+                                    <option value="pelanggan" {{ old('role') == 'pelanggan' ? 'selected' : '' }}>
+                                        <i class="fas fa-user-tie"></i> Pelanggan
+                                    </option>
+                                    <option value="mitra" {{ old('role') == 'mitra' ? 'selected' : '' }}>
+                                        <i class="fas fa-user"></i> Mitra
+                                    </option>
+                                </select>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i>
+                                    Admin: Akses penuh | Manager: Akses menengah | User: Akses terbatas
+                                </small>
+                                @error('role')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i>
-                            <strong>Catatan:</strong> Pastikan password dan konfirmasi password sama.
+                            <strong>Catatan:</strong> Pastikan password dan konfirmasi password sama, serta pilih role yang sesuai.
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">

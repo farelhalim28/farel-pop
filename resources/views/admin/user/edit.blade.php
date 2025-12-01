@@ -7,6 +7,7 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
+
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">Edit User</h4>
                     <a href="{{ route('user.index') }}" class="btn btn-secondary">
@@ -15,6 +16,7 @@
                 </div>
 
                 <div class="card-body">
+
                     @if($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show">
                             <strong>Error!</strong> Ada masalah dengan input Anda:
@@ -31,20 +33,19 @@
                         @csrf
                         @method('PUT')
 
-                        <!-- FOTO PROFIL SAAT INI -->
+                        {{-- FOTO LAMA --}}
                         @if($user->profile_picture)
                             <div class="row mb-3">
                                 <div class="col-12 text-center">
                                     <label class="form-label d-block">Foto Profil Saat Ini</label>
                                     <img src="{{ Storage::url($user->profile_picture) }}"
-                                         alt="Profile Picture"
                                          class="rounded-circle img-thumbnail"
-                                         style="width: 150px; height: 150px; object-fit: cover;">
+                                         style="width:150px;height:150px;object-fit:cover;">
                                 </div>
                             </div>
                         @endif
 
-                        <!-- UPLOAD FOTO BARU -->
+                        {{-- UPLOAD FOTO BARU --}}
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label for="profile_picture" class="form-label">
@@ -62,6 +63,7 @@
                             </div>
                         </div>
 
+                        {{-- NAMA & EMAIL --}}
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
@@ -90,6 +92,39 @@
                             </div>
                         </div>
 
+                        {{-- ROLE --}}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                                <select id="role"
+                                        name="role"
+                                        class="form-control @error('role') is-invalid @enderror"
+                                        required>
+                                    <option value="">-- Pilih Role --</option>
+
+                                    <option value="SuperAdmin"
+                                        {{ $user->role == 'SuperAdmin' ? 'selected' : '' }}>
+                                        Super Admin
+                                    </option>
+
+                                    <option value="Admin"
+                                        {{ $user->role == 'Admin' ? 'selected' : '' }}>
+                                        Admin
+                                    </option>
+
+                                    <option value="User"
+                                        {{ $user->role == 'User' ? 'selected' : '' }}>
+                                        User
+                                    </option>
+                                </select>
+
+                                @error('role')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- PASSWORD --}}
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="password" class="form-label">Password Baru</label>
@@ -116,7 +151,7 @@
 
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle"></i>
-                            <strong>Catatan:</strong> Password hanya akan diubah jika Anda mengisi kolom password baru.
+                            <strong>Catatan:</strong> Password hanya berubah jika Anda mengisi kolom password.
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
@@ -127,8 +162,11 @@
                                 <i class="fas fa-save"></i> Update User
                             </button>
                         </div>
+
                     </form>
+
                 </div>
+
             </div>
         </div>
     </div>

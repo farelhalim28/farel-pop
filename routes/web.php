@@ -14,6 +14,16 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MultipleUploadController;
 
+// Ganti route Anda dengan ini:
+// Di web.php - TIDAK DISARANKAN! ⚠️
+Route::name('auth.')->group(function () {
+    Route::get('/login', [AuthController::class, 'index'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout'); // ⚠️ GET
+});
+
+
+
 
 // ROUTE UTAMA
 Route::get('/', function () {
@@ -57,11 +67,15 @@ Route::resource('/pelanggan', PelangganController::class);
 
 // DASHBOARD
 Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+        ->name('dashboard')
+        ->middleware('checkislogin');
 
 
 // ADMIN GROUP
-Route::resource('/user', UserController::class);
+Route::group(['middleware' => ['checkrole:Super Admin']], function () {
+    Route::resource('/user', UserController::class);
+});
+
 
 
 // MULTIPLE UPLOAD ROUTE

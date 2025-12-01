@@ -30,8 +30,25 @@
                                      style="width: 200px; height: 200px;">
                             @endif
 
+                            {{-- TAMBAHAN: BADGE ROLE --}}
+                            <div class="mt-2 mb-3">
+                                @if($user->role == 'admin')
+                                    <span class="badge bg-danger p-2" style="font-size: 0.9rem;">
+                                        <i class="fas fa-user-shield"></i> Admin
+                                    </span>
+                                @elseif($user->role == 'manager')
+                                    <span class="badge bg-primary p-2" style="font-size: 0.9rem;">
+                                        <i class="fas fa-user-tie"></i> Manager
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary p-2" style="font-size: 0.9rem;">
+                                        <i class="fas fa-user"></i> User
+                                    </span>
+                                @endif
+                            </div>
+
                             <!-- Status Verifikasi -->
-                            <div class="mt-3">
+                            <div class="mt-2">
                                 @if($user->email_verified_at)
                                     <span class="badge bg-success p-2">
                                         <i class="fas fa-check-circle"></i> Email Terverifikasi
@@ -59,6 +76,30 @@
                                             <i class="fas fa-envelope"></i> Email
                                         </th>
                                         <td>{{ $user->email }}</td>
+                                    </tr>
+                                    {{-- TAMBAHAN: ROW ROLE --}}
+                                    <tr>
+                                        <th class="bg-light">
+                                            <i class="fas fa-user-tag"></i> Role
+                                        </th>
+                                        <td>
+                                            @if($user->role == 'admin')
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-user-shield"></i> Admin
+                                                </span>
+                                                <small class="text-muted ms-2">Akses penuh ke sistem</small>
+                                            @elseif($user->role == 'manager')
+                                                <span class="badge bg-primary">
+                                                    <i class="fas fa-user-tie"></i> Manager
+                                                </span>
+                                                <small class="text-muted ms-2">Akses menengah ke sistem</small>
+                                            @else
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-user"></i> User
+                                                </span>
+                                                <small class="text-muted ms-2">Akses terbatas</small>
+                                            @endif
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th class="bg-light">

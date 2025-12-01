@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <- Tambahkan ini bro!
 
 class DashboardController extends Controller
 {
@@ -11,6 +12,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        if(!Auth::check()){
+            //Redirect ke halaman login
+            return redirect()->route('auth.login')->withErrors('Anda harus login terlebih dahulu.');
+        }
         return view('admin.dashboard');
     }
 
